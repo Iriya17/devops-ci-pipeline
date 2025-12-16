@@ -5,10 +5,6 @@ pipeline {
         maven 'Maven'
     }
 
-    environment {
-        SONARQUBE_ENV = 'SonarQube'
-    }
-
     stages {
 
         stage('Checkout Code') {
@@ -25,13 +21,15 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
+            environment {
+                SONAR_TOKEN = credentials('sonar-token')
+            }
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh '''
-                      mvn sonar:sonar \
-                      -Dsonar.login=$SONAR_AUTH_TOKEN
-                    '''
-                }
+                sh '''
+                  mvn sonar:sonar \
+                  -Dsonar.login=$SONAR_TOKEN \
+                  -Dsonar.host.url=http://host.docker.internal:9000
+                '''
             }
         }
     }
